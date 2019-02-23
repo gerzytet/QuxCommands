@@ -1,0 +1,5 @@
+name: QuxCommands
+main: me.github.gerzytet.QuxCommands.QuxCommands
+version: 1.0
+api-version: 1.13
+commands:
