@@ -91,35 +91,22 @@ public class BingoMap implements Cloneable {
     }
 
     private Material randomItem() {
-        int ep = 0;
-        int mp = 0;
-        if (difficulty == 1) {
-            ep = 60;
-            mp = 95;
-        } else if (difficulty == 2) {
-            ep = 20;
-            mp = 80;
-        } else {
-            ep = 5;
-            mp = 40;
-        }
-
-        int r = randomizer.nextInt(100) + 1;
         Material[][] table;
-        if (difficulty == 0) {
+        boolean reduce = randomizer.nextInt(5) == 0;
+        if (difficulty == 3) {
             boolean b = randomizer.nextBoolean();
             if (b) {
-                table = noob;
+                table = hard;
             } else {
-                table = easy;
+                table = medium;
             }
         }
-        else if (r <= ep) {
-            table = easy;
-        } else if (r <= mp) {
-            table = medium;
+        else if (difficulty == 1) {
+            table = reduce ? noob : easy;
+        } else if (difficulty == 2) {
+            table = reduce ? easy : medium;
         } else {
-            table = hard;
+            table = noob;
         }
 
         return (Material)this.randomElement((Material[])this.randomElement(table));

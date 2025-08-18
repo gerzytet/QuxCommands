@@ -1,9 +1,13 @@
 package me.github.gerzytet.QuxCommands.commandModules;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 
 import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.IntegerArgument;
+import dev.jorel.commandapi.CommandPermission;
+import dev.jorel.commandapi.arguments.*;
+import org.bukkit.Bukkit;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ProxiedCommandSender;
@@ -21,6 +25,24 @@ public class TrivialCommands implements commandModule
                         player.getWorld().setTime((int) args.get("time"));
 					}
 				}).register();
+
+		new CommandAPICommand("replacedatetime")
+				.withArguments(new GreedyStringArgument("command"))
+				.executes((sender, args) -> {
+					LocalDateTime now = LocalDateTime.now();
+
+					DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+					DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm:ss a");
+
+					String dateStr = now.format(dateFormatter);
+					String timeStr = now.format(timeFormatter);
+
+					String cmd = (String)args.get("command");
+					cmd = cmd.replace("$date", dateStr).replace("$time", timeStr);
+
+					Bukkit.dispatchCommand(sender, cmd);
+				}).register();
+
 			
 			
 			//X
