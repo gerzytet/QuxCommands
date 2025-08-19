@@ -1,5 +1,6 @@
 package me.github.gerzytet.QuxCommands.commandModules;
 
+import dev.jorel.commandapi.wrappers.SimpleFunctionWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
@@ -19,11 +20,21 @@ class ScoreboardRecord {
     }
 
     public Objective getOrCreateObjective(final Objective objective) {
-        Objective newObjective = scoreboard.getObjective(name);
+        Objective newObjective = scoreboard.getObjective(objective.getName());
         if (newObjective == null) {
             //noinspection deprecation
-            newObjective = scoreboard.registerNewObjective(name, "dummy", objective.getDisplayName());
+            newObjective = scoreboard.registerNewObjective(objective.getName(), "dummy", objective.getDisplayName());
         }
+
         return newObjective;
+    }
+
+    public void clearSlot(DisplaySlot slot) {
+        for (String key : slots.keySet()) {
+            if (slots.get(key) == slot) {
+                slots.remove(key);
+                scoreboard.clearSlot(slot);
+            }
+        }
     }
 }

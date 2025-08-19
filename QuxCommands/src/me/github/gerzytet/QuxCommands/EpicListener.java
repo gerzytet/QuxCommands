@@ -1,9 +1,13 @@
 package me.github.gerzytet.QuxCommands;
 
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.hover.content.Text;
+import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.data.type.CommandBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -11,15 +15,18 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
 
 public class EpicListener implements Listener {
+    public static boolean alertsEnabled;
     private boolean isCommandBlock(Material mat) {
         return mat == Material.COMMAND_BLOCK || mat == Material.CHAIN_COMMAND_BLOCK || mat == Material.REPEATING_COMMAND_BLOCK;
     }
@@ -107,5 +114,59 @@ public class EpicListener implements Listener {
         event.getPlayer().sendMessage("Command broken: ");
         event.getPlayer().sendMessage(chunkString(cmd, 200).toArray(new String[0]));
         QuxCommands.instance.getLogger().warning("Command broken: " + cmd);
+    }
+
+    @EventHandler
+    public void onChunkUnload(ChunkUnloadEvent chunkUnload) {
+        if (!alertsEnabled) return;
+        Chunk chunk = chunkUnload.getChunk();
+        if (chunk.getWorld().getName().equals("bingo")) {
+            return;
+        }
+        ArrayList<org.bukkit.block.CommandBlock> commandBlocks = new ArrayList<>();
+        for (BlockState tileEntity : chunk.getTileEntities()) {
+            if (tileEntity.getBlock().getType() == Material.REPEATING_COMMAND_BLOCK) {
+                commandBlocks.add((org.bukkit.block.CommandBlock) tileEntity);
+            }
+        }
+
+        if (commandBlocks.isEmpty()) {
+            return;
+        }
+
+        Location loc = commandBlocks.get(0).getLocation();
+        QuxCommands.instance.getLogger().warning(
+            "Command block at " + loc.getWorld().getName() + ", " + loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ() +
+                " and " + (commandBlocks.size()-1) + " others were unloaded."
+        );
+
+        BaseComponent commandsUnloaded = new ComponentBuilder().append("Command block at " + loc.getWorld().getName() + ", " + loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ() +
+            " and " + (commandBlocks.size()-1) + " others were unloaded.")
+            .color(net.md_5.bungee.api.ChatColor.YELLOW).build();
+
+        BaseComponent forceloadClickable = new ComponentBuilder().append("Click here to forceload")
+            .underlined(true)
+            .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
+                "/execute in " + loc.getWorld().getKey() + " run forceload add " + loc.getBlockX() + " " + loc.getBlockZ()
+            )).event(
+            new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(
+                new ComponentBuilder()
+                    .append("Click me").build()
+            ))).build();
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.isOp()) {
+                player.spigot().sendMessage(commandsUnloaded);
+                player.spigot().sendMessage(forceloadClickable);
+            }
+        }
+    }
+
+    EpicListener() {
+        alertsEnabled = true;
+    }
+
+    public static void toggleAlerts() {
+        alertsEnabled = !alertsEnabled;
     }
 }

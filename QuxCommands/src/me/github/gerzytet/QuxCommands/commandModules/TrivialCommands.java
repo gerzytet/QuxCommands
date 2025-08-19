@@ -7,8 +7,10 @@ import java.util.LinkedHashMap;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
 import dev.jorel.commandapi.arguments.*;
+import me.github.gerzytet.QuxCommands.EpicListener;
 import org.bukkit.Bukkit;
 import org.bukkit.command.BlockCommandSender;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ProxiedCommandSender;
 import org.bukkit.entity.Entity;
@@ -43,7 +45,13 @@ public class TrivialCommands implements commandModule
 					Bukkit.dispatchCommand(sender, cmd);
 				}).register();
 
-			
+        new CommandAPICommand("toggle_unload_alerts")
+            .withArguments()
+            .withPermission(CommandPermission.OP)
+            .executes((sender, args) -> {
+                EpicListener.toggleAlerts();
+                sender.sendMessage("Show alerts: " + EpicListener.alertsEnabled);
+            }).register();
 			
 			//X
 			/*args = new LinkedHashMap<>();

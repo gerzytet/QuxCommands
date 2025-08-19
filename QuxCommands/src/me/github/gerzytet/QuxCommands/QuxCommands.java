@@ -14,13 +14,13 @@ public class QuxCommands extends JavaPlugin
 	@Override
 	public void onEnable()
 	{
-		TrivialCommands.init();
+        instance = this;
+        TrivialCommands.init();
 		Replace.init();
 		WorldeditCommands.init();
 		QuxScoreboard.init();
 		BingoManager.stop();
 		getServer().getPluginManager().registerEvents(new EpicListener(), this);
-		instance = this;
 	}
 
 	@Override
