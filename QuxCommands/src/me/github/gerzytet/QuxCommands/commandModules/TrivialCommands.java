@@ -3,10 +3,12 @@ package me.github.gerzytet.QuxCommands.commandModules;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
+import java.util.Random;
 
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
 import dev.jorel.commandapi.arguments.*;
+import dev.jorel.commandapi.wrappers.CommandResult;
 import me.github.gerzytet.QuxCommands.EpicListener;
 import org.bukkit.Bukkit;
 import org.bukkit.command.BlockCommandSender;
@@ -18,8 +20,24 @@ import org.bukkit.entity.Player;
 
 public class TrivialCommands implements commandModule
 {
+    private static Random random;
 	public static void init()
 	{
+        random = new Random();
+        new CommandAPICommand("executepercent")
+            .withArguments(
+                new FloatArgument("chance"),
+                new CommandArgument("command")
+            )
+            .withPermission(
+                CommandPermission.OP
+            )
+            .executes((sender, args) -> {
+                if (random.nextFloat() < (float)args.get("chance")) {
+                    ((CommandResult) args.get("command")).execute(sender);
+                }
+            }).register();
+
 		new CommandAPICommand("thyme")
 				.withArguments(new IntegerArgument("time"))
 				.executes((sender, args) -> {

@@ -1,5 +1,10 @@
 package me.github.gerzytet.QuxCommands;
 
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -72,12 +77,14 @@ public class EpicListener implements Listener {
 
         event.setCancelled(true);
         ArrayList<String> commands = new ArrayList<>();
+        ArrayList<String> commands_full = new ArrayList<>();
         HashSet<Location> visited = new HashSet<>();
         int counter = 1;
         while (true) {
             CommandBlock data = (CommandBlock) block.getBlockData();
             org.bukkit.block.CommandBlock state = (org.bukkit.block.CommandBlock) block.getState();
             String cmd = state.getCommand();
+            commands_full.add(cmd);
             if (cmd.length() > 80) {
                 cmd = cmd.substring(0, 80) + "...";
             }
@@ -94,9 +101,32 @@ public class EpicListener implements Listener {
             }
         }
 
-        for (String command : commands) {
-            player.sendMessage(command);
+        // Build a component per command, each copying itself on click
+        TextComponent fullMessage = new TextComponent("");
+
+        for (int i = 0; i < commands.size(); i++) {
+            String command = commands.get(i);
+            String full_command = commands_full.get(i);
+            TextComponent line = new TextComponent(command);
+            line.setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, full_command));
+            line.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    new Text(ChatColor.GRAY + "Click to copy this command")));
+
+            fullMessage.addExtra(line);
+            fullMessage.addExtra("\n");
         }
+
+        // "Copy All" button, joining every command with newlines
+        String combined = String.join("\n", commands_full);
+        TextComponent copyAll = new TextComponent(ChatColor.GREEN + "" + ChatColor.BOLD + "[Copy All]");
+        copyAll.setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, combined));
+        copyAll.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                new Text(ChatColor.GRAY + "Click to copy all commands")));
+
+        fullMessage.addExtra(copyAll);
+
+        // Send the whole thing as one message
+        player.spigot().sendMessage(fullMessage);
     }
 
     @EventHandler

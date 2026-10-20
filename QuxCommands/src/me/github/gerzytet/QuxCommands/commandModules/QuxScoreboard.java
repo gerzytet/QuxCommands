@@ -196,6 +196,73 @@ public class QuxScoreboard {
                 sender.sendMessage("Reset view of " + players.size() + " players");
             });
 
+        var flush = new CommandAPICommand("flush")
+            .withArguments(
+                nameArg()
+            )
+            .executes((sender, args) -> {
+                String name = (String) args.get("name");
+                ScoreboardRecord scoreboardRecord = getScoreboard(name);
+                Scoreboard target = scoreboardRecord.scoreboard;
+                String[] entries = target.getEntries().toArray(new String[0]);
+                for (String entry : entries) {
+                    target.resetScores(entry);
+                }
+
+                for (Team team : target.getTeams()) {
+                    team.unregister();
+                }
+                sender.sendMessage("flushed " + name);
+            });
+
+        var reflectteams = new CommandAPICommand("reflectteams")
+            .withArguments(
+                new EntitySelectorArgument.ManyPlayers("players")
+            )
+            .executes((sender, args) -> {
+                @SuppressWarnings("unchecked") Collection<Player> players = (Collection<Player>) args.get("players");
+                if (players == null) {
+                    return;
+                }
+
+                for (Player player : players) {
+                    Team targetTeam = player.getScoreboard().getEntryTeam(player.getName());
+                    Team mainTeam = Bukkit.getScoreboardManager().getMainScoreboard().getEntryTeam(player.getName());
+
+                    boolean teamsEqual =
+                        targetTeam == mainTeam || targetTeam != null && mainTeam != null && targetTeam.getName().equals(mainTeam.getName());
+                    if (teamsEqual) {
+                        return;
+                    }
+
+                    if (!teamsEqual) {
+                        Team newTargetTeam = player.getScoreboard().getTeam(mainTeam.getName());
+                        if (newTargetTeam != null) {
+                            newTargetTeam.addEntry(player.getName());
+                            continue;
+                        }
+                    } else if (mainTeam == null) {
+                        if (targetTeam != null) {
+                            targetTeam.removeEntry(player.getName());
+                        }
+                        continue;
+                    }
+
+                    Team newTargetTeam = player.getScoreboard().registerNewTeam(mainTeam.getName());
+                    newTargetTeam.setPrefix(mainTeam.getPrefix());
+                    newTargetTeam.setAllowFriendlyFire(mainTeam.allowFriendlyFire());
+                    newTargetTeam.setCanSeeFriendlyInvisibles(mainTeam.canSeeFriendlyInvisibles());
+                    newTargetTeam.setDisplayName(newTargetTeam.getDisplayName());
+                    for (var option : Team.Option.values()) {
+                        newTargetTeam.setOption(option, mainTeam.getOption(option));
+                    }
+                    newTargetTeam.setPrefix(mainTeam.getPrefix());
+                    newTargetTeam.setSuffix(mainTeam.getSuffix());
+                    newTargetTeam.addEntry(player.getName());
+                }
+                sender.sendMessage("Reflected teams of " + players.size() + " players");
+            });
+
         var reflect = new CommandAPICommand("reflect")
             .withArguments(
                 nameArg(),
@@ -228,6 +295,8 @@ public class QuxScoreboard {
             .withSubcommand(view)
             .withSubcommand(reset)
             .withSubcommand(reflect)
+            .withSubcommand(flush)
+            .withSubcommand(reflectteams)
             .register();
     }
 }

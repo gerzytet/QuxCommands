@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+
+import me.github.gerzytet.QuxCommands.QuxCommands;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -264,5 +267,20 @@ public class BingoMap implements Cloneable {
         }
 
         return map;
+    }
+
+    public static void init() {
+        String noob = "stick,dirt,flint,stone_shovel,stone_pickaxe,stone_sword,stone_hoe,stone_axe,wheat_seed,sand,oak_sapling,crafting_table,bowl,kelp,clay_ball,cobblestone,chest,furnace,wooden_hoe,wooden_pickaxe,wooden_shovel,sandstone,ladder,wooden_axe,gravel,dandelion,barrel,composter";
+        String easy = "stick,dirt,flint,wheat,cooked_cod,lantern,piston,[polished_granite,polished_diorite,polished_andesite],smooth_sandstone_slab,oxeye_daisy,paper,birch_sapling,glass_bottle,red_stained_glass_pane,shears,oak_leaves,iron_ingot,apple,beef,cracked_stone_bricks,leather,[acacia_planks,dark_oak_planks,jungle_planks],porkchop,dandelion,coal_block,beef,water_bucket,dried_kelp_block,string,rotten_flesh,cobbled_deepslate,copper_block,wildflowers";
+        String medium = "gold_ingot,vine,lily_pad,snowball,bricks,note_block,mossy_cobblestone,mushroom_stew,carved_pumpkin,pufferfish,map,firework_star,lapis_block,lectern,cookie,sea_pickle,blast_furnace,green_dye,scaffolding,orange_concrete,egg,carrot,detector_rail,iron_block,ink_sac,amethyst_block,emerald,tuff,netherrack,melon_seeds,[acacia_planks,dark_oak_planks,jungle_planks],leather_helmet,cooked_salmon,glow_berries,moss_block,cornflower,dripstone_block,arrow";
+        String hard = "cake,diamond,nautilus_shell,enchanted_book,observer,sticky_piston,tropical_fish_bucket,magma_cream,redstone_lamp,name_tag,anvil,comparator,enchanting_table,emerald_block,tnt,ender_pearl,blaze_rod,tropical_fish,crying_obsidian,fermented_spider_eye,glowstone,cooked_rabbit,golden_apple,glow_ink_sac,redstone_lamp,axolotl_bucket,orange_tulip,bone_block,jukebox,honey_block,pumpkin_pie,beetroot_soup";
+
+
+        BingoMap.setNoobTable(noob.split(","));
+        BingoMap.setEasyTable(easy.split(","));
+        BingoMap.setMediumTable(medium.split(","));
+        BingoMap.setHardTable(hard.split(","));
+
+        Bukkit.getScheduler().runTaskTimer(QuxCommands.instance, BingoManager::scan, 0L, 5L);
     }
 }
